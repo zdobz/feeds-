@@ -1,0 +1,14 @@
+# 1. 모든 파일과 폴더를 기본적으로 무시합니다.
+*
+
+# 2. static 폴더와 그 안의 모든 내용을 포함합니다.
+!static/
+!static/**
+
+# 3. templates 폴더와 그 안의 모든 내용을 포함합니다.
+!templates/
+!templates/**
+
+# 4. (선택) 이 외의 특정 파일이나 폴더가 더 있다면 여기에 추가하세요.
+# 예: !videos.db
+*.zip'!/.gitignore' 
