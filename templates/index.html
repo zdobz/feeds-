@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="control-bar">
+    <div class="control-left">
+        <div class="flex-center-gap">
+            <!-- 정렬 체크박스: 체크=DB 수집순(created), 해제=출시일순(published) -->
+            <input type="checkbox" id="sort-toggle-checkbox" class="sort-checkbox" {% if sort_type == 'created' %}checked{% endif %} title="체크 시 DB 추가시간(수집순) 정렬, 해제 시 출시일 정렬">
+            <div class="page-info page-info-layout" onclick="location.href='/';" title="최신 자료(처음)로 이동">페이지 <span id="current-display-page">{{ page }}</span> / {{ max_page }} [{{ "{:,}".format(total_count) }}]</div>
+            <!-- [기능 추가] 좋아요(Like) 모아보기 연동 전용 필터 칩 -->
+            <div class="like-chip-btn {% if liked == 1 %}active{% endif %}" onclick="toggleLikeFilter()" title="좋아요 표시한 영상들만 모아보기">
+                👍 <span id="liked-count-display">{{ liked_total_count }}</span>
+            </div>
+        </div>
+        
+        <div class="fixed-tags">
+            {% for tag, count in fixed_tags %}
+            <span class="tag-chip {% if selected_tag == tag %}active{% endif %}" onclick="searchTag('{{ tag }}')">{{ tag }}({{ count }})</span>
+            {% endfor %}
+            <!-- 태그 고정 노출 축소에 맞춰 더보기 텍스트를 '+' 기호로 간소화 -->
+            <button class="tag-more-btn" onclick="toggleTagDrawer()"> + </button>
+        </div>
+
+        <!-- 활성 필터 칩 목록 (각 필터 유형별 색상 구분) -->
+        <div class="active-filters">
+            {% for filter in active_filters %}
+                {% if filter.type == 'new' %}
+                <span class="filter-chip filter-chip-new" onclick="clearNewFilter()"><span class="filter-chip-new-text">New</span> ✕</span>
+                {% elif filter.type == 'liked' %}
+                <span class="filter-chip filter-chip-liked" onclick="removeFilter('liked')"><span class="filter-chip-liked-text">Liked</span> ✕</span>
+                {% elif filter.type == 'age_range' %}
+                <span class="filter-chip filter-chip-profile" onclick="removeFilter('age_range')"><span class="filter-chip-profile-text">{{ filter.label }}</span> ✕</span>
+                {% elif filter.type == 'height_range' %}
+                <span class="filter-chip filter-chip-profile" onclick="removeFilter('height_range')"><span class="filter-chip-profile-text">{{ filter.label }}</span> ✕</span>
+                {% else %}
+                <span class="filter-chip" onclick="removeFilter('{{ filter.type }}')">{{ filter.label }} ✕</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div> <!-- control-left 닫는 태그 -->
+
+    <form id="filter-form" action="/" method="GET" class="filter-form-layout">
+        <input type="hidden" name="feed_id" id="feed-id-input" value="{{ feed_id }}" autocomplete="off">
+        <input type="hidden" name="sort" id="sort-input" value="{{ sort_type }}" autocomplete="off">
+        
+        <!-- [롤백] 원래 지시대로 태그, 배우, 프로필 버튼을 form 내부에만 정확히 원상 복귀 -->
+        <button type="button" onclick="openTagsModal()" class="btn-base btn-tool-orange">태그</button>
+        <button type="button" onclick="openActressModal()" class="btn-base btn-tool-orange">배우</button>
+        <!-- [기능 추가] 프로필(나이대/키) 서랍 개폐 전용 버튼 -->
+        <button type="button" onclick="toggleProfileDrawer()" class="btn-base btn-tool-orange">프로필</button>
+
+        <div class="custom-select" id="custom-select-box">
+            <div class="select-trigger" id="select-trigger-btn">{{ selected_actress_name }}</div>
+            <div class="select-options" id="select-options-list">
+                <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 전체 배우 --</div>
+                {% for act in actresses %}
+                <div class="option-item {% if act.id|string == feed_id %}selected{% endif %}" data-value="{{ act.id }}">{{ act.display_name }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <input type="hidden" name="year" id="year-input" value="{{ selected_year }}" autocomplete="off">
+        <div class="custom-select" id="year-select-box">
+            <div class="select-trigger" id="year-trigger-btn">{{ display_year_name }}</div>
+            <div class="select-options" id="year-options-list">
+                <div class="year-option-item {% if not selected_year %}selected{% endif %}" data-value="">-- 연도 --</div>
+                {% for y in db_years %}
+                <div class="year-option-item {% if y == selected_year %}selected{% endif %}" data-value="{{ y }}">{{ y }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <input type="text" id="search-input" name="q" placeholder="검색어 입력" value="{{ q }}" class="input-box">
+        <button type="submit" class="search-btn">검색</button>
+        <a href="/" class="reset-btn">초기화</a>
+        <button type="button" onclick="triggerActressSync()" class="btn-base btn-sync-action">갱신</button>
+    </form>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     프로필 서랍: 나이대(20/30/40) + 키 구간(~150~171~) 필터
+     필터 활성 상태이면 서버에서 open 클래스 부여하여 자동 전개
+──────────────────────────────────────────────────────── -->
+<div id="profile-drawer" class="profile-drawer {% if selected_age_range or selected_height_range %}open{% endif %}">
+    <!-- 나이/키 1행 레이아웃 행 컨테이너 -->
+    <div class="profile-drawer-row">
+        <!-- 나이대 섹션 (20대/30대/40대) -->
+        <div class="profile-drawer-section">
+            <span class="drawer-label">🎂 나이:</span>
+            {% for age_val, age_lbl in [('20', '20대'), ('30', '30대'), ('40', '40대')] %}
+            <span class="profile-chip {% if selected_age_range == age_val %}active{% endif %}" onclick="searchAgeRange('{{ age_val }}')">{{ age_lbl }}</span>
+            {% endfor %}
+        </div>
+
+        <!-- 나이/키 구분선 -->
+        <div class="drawer-divider"></div>
+
+        <!-- 키 구간 섹션 (~150 / 160 / 165 / 170 / 171~) -->
+        <div class="profile-drawer-section">
+            <span class="drawer-label">📏 키:</span>
+            {% for h_val, h_label in [('-155', '~150'), ('155-160', '160'), ('160-165', '165'), ('165-170', '170'), ('170-', '171~')] %}
+            <span class="profile-chip {% if selected_height_range == h_val %}active{% endif %}" onclick="searchHeightRange('{{ h_val }}')">{{ h_label }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     태그 서랍: 상위 5개 이후 나머지 태그 (720 포함) 펼치기
+     app.js toggleTagDrawer() 로 open 클래스 토글 제어
+──────────────────────────────────────────────────────── -->
+<div id="tag-drawer" class="tag-drawer">
+    <div class="tag-drawer-grid">
+        {% for tag, count in drawer_tags %}
+        <!-- 선택된 태그는 active 강조 클래스 적용 -->
+        <span class="tag-chip {% if selected_tag == tag %}active{% endif %}" onclick="searchTag('{{ tag }}')">{{ tag }}({{ count }})</span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     메인 콘텐츠: 좌측 사이드바(페이지 번호) + 카드 그리드
+──────────────────────────────────────────────────────── -->
+<div class="content-wrapper">
+    <div class="sidebar">
+        <a href="javascript:void(0);" onclick="scrollToFirst();" class="nav-btn">F</a>
+        <a href="javascript:void(0);" onclick="scrollPageOffset(-1);" class="nav-btn">&lt;</a>
+        
+        {% for p in range(start_p, end_p + 1) %}
+        <a href="javascript:void(0);" onclick="scrollToPage({{ p }});" data-page="{{ p }}" class="page-num {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+        
+        <a href="javascript:void(0);" onclick="scrollPageOffset(1);" class="nav-btn">&gt;</a>
+        <a href="javascript:void(0);" onclick="scrollToEnd();" class="nav-btn">E</a>
+    </div>
+    
+    <div class="main-content">
+        <div class="grid">
+            {% for card in cards %}
+            <div class="card" data-id="{{ card.id }}">
+                <div class="card-img-wrapper">
+                    <a href="{{ card.link }}" target="_blank" class="card-link-wrapper">
+                        <img src="{{ card.img_url }}" loading="lazy" alt="cover" onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/placeholder.png') }}';">
+                        
+                        {% if card.is_720 %}
+                        <span class="badge-720">720</span>
+                        {% endif %}
+
+                        <!-- [기능 수정] 상단 좌측(상좌) 2줄 포맷(1행: 152cm/32D.21.31, 2행: 1993.09.33세) 프로필 배지 -->
+                        {% if card.actress_spec_line1 or card.actress_spec_line2 %}
+                        <span class="actress-spec-badge" title="프로필 스펙 정보">
+                            {% if card.actress_spec_line1 %}{{ card.actress_spec_line1 }}{% endif %}
+                            {% if card.actress_spec_line2 %}<br/>{{ card.actress_spec_line2 }}{% endif %}
+                        </span>
+                        {% endif %}
+                    </a>
+                    <span class="like-btn {% if card.liked == 1 %}liked{% else %}not-liked{% endif %}" title="좋아요 표시/해제">👍</span>
+                </div>
+                <div class="title">
+                    <!-- 품번 링크: 클릭 시 해당 메이커 검색 -->
+                    {% if card.match_maker %}
+                    <a href="/?q={{ card.match_maker }}" class="card-code-link">{{ card.match_maker }}{{ card.match_num }}</a>
+                    {% else %}
+                    <span class="card-code-text">{{ card.first_word }}</span>
+                    {% endif %}
+                    <!-- 배우명 링크: 클릭 시 해당 배우 필터링 -->
+                    <a href="/?feed_id={{ card.feed_id }}" class="card-actress-link">{{ card.actress_name }}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     태그 편집 모달: Tags.txt 목록 조회/저장/rebuild 연동
+──────────────────────────────────────────────────────── -->
+<div id="tags-modal" class="admin-modal">
+    <div class="admin-modal-content">
+        <div class="modal-header">
+            <span class="modal-close-btn" onclick="closeTagsModal()">&times;</span>
+        </div>
+        
+        <div class="modal-guide-box">
+            <span class="modal-guide-title">태그 편집 가이드:</span><br>
+            • 한 줄에 태그를 하나씩 입력하십시오. 줄 순서 그대로 노출 우선순위가 결정됩니다.<br>
+            • 중요 정렬 그룹(예: `00_태그명`) 형태로 작성된 가중치 숫자를 앞에 포함할 수 있습니다.<br>
+            • **[적용]**은 단순 목록 변경 저장이며, **[청소]** 클릭 시 DB 매칭 개수를 실시간 분석하여 태그 목록을 전체 갱신합니다.
+        </div>
+        
+        <textarea id="tags-textarea" class="modal-textarea" placeholder="태그를 한 줄에 하나씩 입력하십시오."></textarea>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn-base btn-modal-action-clean" onclick="cleanUpTags()" title="rebuild_tags.py를 백그라운드로 작동시켜 비디오와 태그를 매칭하고 개수를 자동 재분석합니다.">청소</button>
+            <button type="button" class="btn-base btn-modal-action-save" onclick="saveTagsChanges()">적용</button>
+            <button type="button" class="btn-base btn-modal-action-close" onclick="closeTagsModal()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────
+     배우 관리 모달: DB feeds 목록 CRUD + 123av.txt 동기화
+──────────────────────────────────────────────────────── -->
+<div id="actress-modal" class="admin-modal">
+    <div class="admin-modal-content">
+        <div class="modal-header">
+            <span class="modal-close-btn" onclick="closeActressModal()">&times;</span>
+        </div>
+        
+        <!-- 신규 배우 추가 폼 (ID/한글명/영문명) -->
+        <div class="admin-form-group">
+            <span class="form-label-accent">신규 추가:</span>
+            <input type="number" id="new-actress-id" class="admin-input admin-input-small" placeholder="배우 ID (숫자)">
+            <input type="text" id="new-actress-title" class="admin-input admin-input-flex" placeholder="한글 이름">
+            <input type="text" id="new-actress-eng" class="admin-input admin-input-flex" placeholder="영문 이름">
+            <button type="button" class="btn-base btn-modal-action-add" onclick="addActressRow()">추가</button>
+        </div>
+        
+        <!-- 배우 목록 테이블 (최대 750px 높이, 스크롤 가능) -->
+        <div class="admin-table-container">
+            <table id="actress-table" class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="th-id">ID</th>
+                        <th>한글 이름 (수정 가능)</th>
+                        <th>영문 이름 (수정 가능)</th>
+                        <th class="th-action">동작</th>
+                    </tr>
+                </thead>
+                <tbody id="actress-table-body">
+                    <!-- 자바스크립트(admin.js)로 동적 렌더링 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 모달 풋터 (청소/적용/닫기) -->
+        <div class="modal-footer">
+            <button type="button" class="btn-base btn-modal-action-clean" onclick="cleanUpActresses()" title="actress collection.txt 리스트와 매칭되지 않는 배우 및 꼬인 동영상 데이터를 DB에서 안전하게 검증 정리합니다.">청소</button>
+            <button type="button" class="btn-base btn-modal-action-save" onclick="saveActressChanges()">적용</button>
+            <button type="button" class="btn-base btn-modal-action-close" onclick="closeActressModal()">닫기</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.appConfig = {
+        startPage: {{ start_p }},
+        endPage: {{ end_p }},
+        currentPage: {{ page }},
+        maxPage: {{ max_page }},
+        currentMaxRowid: {{ max_rowid }},
+        currentTotalCount: {{ all_total_count }},
+        activeNewSince: {{ new_since }}
+    };
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

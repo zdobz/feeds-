@@ -1,0 +1,812 @@
+/* ===================================================================
+   style.css — D:\feeds 프로젝트 통합 디자인 시스템
+   섹션 구조:
+     1. 기본 레이아웃       : body, control-bar, control-left
+     2. 태그 & 서랍         : tag-chip, tag-drawer, profile-drawer
+     3. 콘텐츠 영역         : content-wrapper, sidebar, main-content
+     4. 드롭다운 & 입력     : custom-select, input-box, search-btn
+     5. 카드 그리드         : grid, card, badge
+     6. 페이지네이션        : page-num, nav-btn
+     7. 필터 칩             : filter-chip, active-filters
+     8. 모달 (관리자)       : admin-modal, admin-table
+     9. 버튼 시스템         : btn-base, btn-*
+    10. 좋아요 시스템       : like-chip-btn, like-btn
+=================================================================== */
+
+/* === 1. 기본 레이아웃 === */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+/* === 컨트롤 바 (상단 필터/버튼/검색 영역) === */
+.control-bar {
+    background-color: #1e1e1e;
+    padding: 4px 7px;
+    border-bottom: 1px solid #333333;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
+.control-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+/* === 2. 태그 칩 & 서랍 === */
+.fixed-tags {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.tag-chip {
+    background-color: #24242b;
+    color: #bbbbbb;
+    padding: 1px 1px;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+.tag-chip:hover {
+    background-color: #f59e0b;
+    color: #121212;
+    border-color: #f59e0b;
+}
+.tag-more-btn {
+    background: none;
+    border: 1px dashed #6c6c00;
+    color: #f59e0b;
+    /* '+' 기호 단독 표시 시 버튼이 작아지지 않도록 패딩과 폰트 크기 확대 조정 */
+    padding: 2px 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.tag-more-btn:hover {
+    background-color: #f59e0b;
+    color: #121212;
+}
+.tag-drawer {
+    background-color: #16161a;
+    border-bottom: 1px solid #2d2d35;
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-out, padding-top 0.25s ease-out, padding-bottom 0.25s ease-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+}
+.tag-drawer.open {
+    max-height: 70px;
+    padding: 6px 20px;
+    overflow-y: auto;
+}
+.tag-drawer::-webkit-scrollbar {
+    width: 4px;
+}
+.tag-drawer::-webkit-scrollbar-thumb {
+    background-color: #3f3f46;
+    border-radius: 2px;
+}
+.tag-drawer-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-bottom: 4px;
+}
+/* === 3. 콘텐츠 영역 === */
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    width: 100%;
+}
+/* 좌측 페이지 네비게이션 사이드바 */
+.sidebar {
+    width: 48px;
+    background-color: #1a1a1a;
+    border-right: 1px solid #333333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    overflow-y: auto;
+    flex-shrink: 0;
+    height: 100%;
+    /* IE/Firefox 스크롤바 숨김 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+/* 메인 콘텐츠 영역 (카드 그리드 포함, 스크롤 영역) */
+.main-content {
+    flex: 1;
+    padding: 15px 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    height: 100%;
+    box-sizing: border-box;
+    /* IE/Firefox 스크롤바 숨김 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.main-content::-webkit-scrollbar { display: none; }
+/* === 4. 페이지 정보 & 드롭다운 & 입력 === */
+.page-info {
+    font-size: 13px;
+    color: #f59e0b;
+    font-weight: bold;
+    margin-right: 15px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.page-info:hover {
+    color: #d97706;
+}
+.custom-select {
+    position: relative;
+    min-width: 120px;
+    width: 140px;
+    user-select: none;
+}
+.input-box, .search-btn, .reset-btn {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+.select-trigger {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    /* 긴 영문 이름 선택 시 폼 찌그러짐 및 줄바꿈을 원천 차단하기 위한 스타일 지정 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.select-trigger::after {
+    content: "▼";
+    font-size: 9px;
+    color: #f59e0b;
+    margin-left: 8px;
+}
+.select-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background-color: #1e1e1e;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    min-width: 150px;
+    width: max-content;
+    max-height: 840px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.select-options.open {
+    display: block;
+}
+.select-options::-webkit-scrollbar {
+    display: none;
+}
+.option-item, .year-option-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #cccccc;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+    text-align: left;
+    white-space: nowrap;
+}
+.option-item:hover {
+    background-color: #f59e0b;
+    color: #121212;
+}
+.option-item.selected {
+    background-color: #333333;
+    color: #f59e0b;
+    font-weight: bold;
+}
+/* 연도 드롭다운 hover/selected 상태 (option-item과 동일 스타일 개별 선언) */
+.year-option-item:hover {
+    background-color: #f59e0b;
+    color: #121212;
+}
+.year-option-item.selected {
+    background-color: #333333;
+    color: #f59e0b;
+    font-weight: bold;
+}
+.select-box:focus, .input-box:focus {
+    border-color: #f59e0b;
+}
+.input-box {
+    /* 배우 선택 폼과 너비를 통일하여 시각적 균형 유도 (200px -> 140px) */
+    width: 140px;
+    margin-left: 10px;
+}
+.search-btn {
+    background-color: #f59e0b;
+    color: #121212;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: background-color 0.2s;
+}
+.search-btn:hover {
+    background-color: #d97706;
+}
+.reset-btn {
+    text-decoration: none;
+    text-align: center;
+    background-color: #3f3f46;
+    border: 1px solid #444444;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+    line-height: 1.4;
+}
+.reset-btn:hover {
+    background-color: #52525b;
+}
+/* === 5. 카드 그리드 & 배지 === */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    max-width: 100%;
+    width: 100%;
+    padding-bottom: 500px;
+}
+.card {
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 244px;
+    box-sizing: border-box;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+}
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    border-bottom: 2px solid #f59e0b;
+}
+/* 카드 이미지 링크 컨테이너 (배지 배치용 상대 좌표 지정) */
+.card-link-wrapper {
+    position: relative;
+    display: block;
+}
+/* 카드 이미지 및 배지/버튼 정렬을 묶어주는 래퍼 컨테이너 */
+.card-img-wrapper {
+    position: relative;
+    display: block;
+}
+/* HD/1080 미검출 영상에 한해 카드 상단 우측(상우)에 노출할 빨간색 720 배지 */
+.badge-720 {
+    position: absolute;
+    top: 8px;
+    right: 8px; /* [기능 수정] 상단 우측 위치로 변경 */
+    left: auto;
+    background-color: #dc2626; /* 빨간색 포인트 */
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+/* [기능 추가] 카드 상단 좌측(상좌)에 노출할 LIKE 배경과 동일한 흑색반투명 + 금색 폰트 프로필 스펙 배지 */
+.actress-spec-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px; /* [기능 수정] 상단 좌측 위치 배치 */
+    background-color: rgba(0, 0, 0, 0.75); /* LIKE 활성 배경과 동일한 흑색 반투명 */
+    color: #f59e0b; /* 금색 폰트 적용 */
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 7px;
+    border-radius: 4px;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    line-height: 1.3;
+    text-align: left;
+    white-space: nowrap;
+}
+/* === 프로필 서랍 (나이대/키 필터) === */
+.profile-drawer {
+    display: none;
+    background-color: #1e1e24;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+.profile-drawer.open {
+    display: block !important;
+}
+.profile-chip {
+    display: inline-block;
+    background-color: #26262b;
+    color: #d1d5db;
+    border: 1px solid #374151;
+    border-radius: 14px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 6px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.profile-chip:hover, .profile-chip.active {
+    background-color: #f59e0b;
+    color: #121212;
+    border-color: #f59e0b;
+}
+
+.filter-chip-profile {
+    background-color: #451a03;
+    color: #fef08a;
+    border-color: #d97706;
+}
+.filter-chip-profile-text {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+/* === 카드 제목 영역 === */
+.title {
+    padding: 4px 8px;
+    font-size: 11px;
+    height: 44px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    text-align: center;
+}
+/* === 6. 페이지네이션 버튼 === */
+.page-num, .nav-btn {
+    display: block;
+    width: 32px;
+    padding: 4px 0;
+    margin: 1px 0;
+    text-align: center;
+    text-decoration: none;
+    color: #aaaaaa;
+    background-color: #262626;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+}
+.page-num:hover, .nav-btn:hover {
+    background-color: #3b3b3b;
+    color: #ffffff;
+}
+.page-num.active {
+    background-color: #f59e0b;
+    color: #121212;
+}
+.nav-btn {
+    background-color: #333333;
+    color: #f59e0b;
+    font-size: 12px;
+}
+/* === 7. 필터 칩 (활성 필터 표시) === */
+.active-filters {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 5px;
+}
+.filter-chip {
+    background-color: #3b1c1c;
+    color: #fca5a5;
+    padding: 1px 1px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.filter-chip:hover {
+    background-color: #7f1d1d;
+    color: #ffffff;
+    border-color: #ef4444;
+}
+/* === 8. 모달 (관리자 태그/배우 편집) === */
+.admin-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+}
+.admin-modal-content {
+    background-color: #1e1e1e;
+    padding: 25px;
+    border: 1px solid #333333;
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+.modal-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-bottom: 1px solid #333333;
+    padding-bottom: 2px;
+    margin-bottom: 5px;
+    height: 24px;
+    box-sizing: border-box;
+}
+.modal-close-btn {
+    color: #aaaaaa;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.modal-guide-box {
+    font-size: 13px;
+    color: #bbbbbb;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    background: #262626;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #f59e0b;
+    box-sizing: border-box;
+}
+.modal-textarea {
+    flex: 1;
+    min-height: 660px;
+    max-height: 800px;
+    background: #161616;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    color: white;
+    padding: 15px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #333333;
+    padding-top: 15px;
+}
+.admin-form-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    background: #262626;
+    padding: 12px;
+    border-radius: 6px;
+    align-items: center;
+    box-sizing: border-box;
+}
+.admin-input {
+    background: #121212;
+    border: 1px solid #444444;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+.admin-input-small { width: 110px; }
+.admin-input-flex { flex: 1; }
+.admin-input-cell { width: 95%; }
+.admin-table-container {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 750px;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background: #161616;
+}
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+.admin-table thead tr {
+    background-color: #2b2b2b;
+    border-bottom: 2px solid #444444;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.admin-table th, .admin-table td { padding: 12px; }
+.admin-table tbody tr { border-bottom: 1px solid #333333; }
+.admin-action-cell {
+    text-align: center;
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+/* === 9. 버튼 시스템 === */
+.btn-base {
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.btn-tool-orange {
+    background-color: #2b2b2b;
+    color: #f59e0b;
+    border: 1px solid #444444;
+    padding: 6px 10px;
+    margin-right: 8px;
+    height: 32px;
+}
+.btn-sync-action {
+    background-color: #1e3a8a;
+    color: #ffffff;
+    border: 1px solid #1d4ed8;
+    padding: 6px 12px;
+    margin-left: 8px;
+    height: 32px;
+}
+.btn-modal-action-add { background: #f59e0b; color: #121212; padding: 6px 15px; height: 32px; }
+.btn-modal-action-clean { background: #dc2626; color: white; padding: 8px 16px; margin-right: auto; }
+.btn-modal-action-save { background: #10b981; color: white; padding: 8px 16px; }
+.btn-modal-action-close { background: #4b5563; color: white; padding: 8px 16px; }
+.btn-row-move { background: #3f3f46; color: white; border: 1px solid #444444; padding: 4px 8px; font-size: 11px; }
+.btn-row-del { background: #dc2626; color: white; padding: 5px 10px; font-size: 11px; transition: background-color 0.2s; margin-left: 4px; }
+.badge-new-video {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ff0000 !important;
+    background-color: #a3e635 !important;
+    padding: 2px 6px;
+    border: 1px solid #84cc16;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 8px;
+    font-weight: bold;
+    transition: all 0.2s;
+    user-select: none;
+}
+.badge-new-video .btn-view { cursor: pointer; }
+.badge-new-video .btn-close {
+    cursor: pointer;
+    color: #b91c1c;
+    font-weight: bold;
+    padding-left: 4px;
+    border-left: 1px solid #84cc16;
+}
+.filter-form-layout { display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; }
+.flex-center-gap { display: inline-flex; align-items: center; gap: 8px; margin-right: 15px; }
+.page-info-layout { margin-right: 0; }
+.filter-chip-new { background-color: #1e3a8a; color: #93c5fd; border-color: #1d4ed8; }
+.filter-chip-new-text { color: #f87171; font-weight: bold; }
+#year-select-box { min-width: 75px; width: 75px; margin-left: 8px; }
+#year-options-list { min-width: 75px; width: 75px; }
+/* === 10. 좋아요(Like) 시스템 === */
+.like-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #24242b;
+    color: #f59e0b;
+    border: 1px solid #737300;
+    padding: 1px 1px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    margin-left: 2px;
+}
+.like-chip-btn:hover, .like-chip-btn.active {
+    background-color: #f59e0b;
+    color: #121212;
+}
+.filter-chip-liked {
+    background-color: #78350f;
+    color: #fef08a;
+    border-color: #f59e0b;
+}
+.filter-chip-liked-text {
+    color: #fbbf24;
+    font-weight: bold;
+}
+.like-btn {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    font-size: 11px; /* 둥근 배경 축소에 비례해 이모지 폰트 크기 축소 */
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    /* 이모지를 감싸는 정원 래퍼 크기 축소 (28px -> 24px) */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: transparent;
+}
+.like-btn.not-liked {
+    filter: grayscale(100%) opacity(0.65);
+    /* [시인성 개선] 비활성(좋아요 아님) 상태일 때도 둥근 흰색 반투명 배경을 깔아 형태를 또렷하게 노출 */
+    background-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.like-btn.not-liked:hover {
+    filter: grayscale(50%) opacity(0.9);
+    /* 마우스 호버 시 흰색 투명도를 높여 활성 예고 반응 제공 */
+    background-color: rgba(255, 255, 255, 0.75);
+}
+.like-btn.liked {
+    filter: none;
+    transform: scale(1.15);
+    /* 좋아요 활성화 상태일 때는 원안대로 둥근 흑색 반투명 배경 적용 */
+    background-color: rgba(0, 0, 0, 0.75);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* ===================================================================
+   인라인 스타일 이관 클래스 (index.html에서 분리)
+=================================================================== */
+
+/* 정렬 체크박스 (체크: DB 수집순, 해제: 출시일순) */
+.sort-checkbox {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: #f59e0b;
+    margin: 0;
+}
+/* 프로필 서랍 내부 1행 레이아웃 (나이 + 구분선 + 키) */
+.profile-drawer-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+/* 프로필 서랍 내 나이대/키 섹션 컨테이너 */
+.profile-drawer-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* 나이:/키: 강조 레이블 텍스트 */
+.drawer-label {
+    font-size: 11px;
+    color: #f59e0b;
+    font-weight: bold;
+    min-width: 50px;
+}
+/* 나이/키 섹션 사이 구분선 */
+.drawer-divider {
+    width: 1px;
+    height: 16px;
+    background-color: #374151;
+}
+/* 카드 품번(예: MIDE-123) 클릭 검색 링크 */
+.card-code-link {
+    color: #f59e0b;
+    text-decoration: none;
+    font-weight: bold;
+}
+/* 품번 파싱 실패 시 첫 단어 텍스트 표시 */
+.card-code-text {
+    color: #f59e0b;
+    font-weight: bold;
+}
+/* 카드 하단 배우명 필터 링크 */
+.card-actress-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+}
+/* 태그/배우 모달 가이드 제목 강조 텍스트 */
+.modal-guide-title {
+    font-weight: bold;
+    color: #f59e0b;
+}
+/* 모달 폼 내 신규 추가 레이블 강조 스타일 */
+.form-label-accent {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f59e0b;
+    margin-right: 5px;
+}
+/* 배우 테이블 ID 컬럼 고정 폭 */
+.th-id { width: 110px; }
+/* 배우 테이블 동작 컬럼 고정 폭 및 중앙 정렬 */
+.th-action { width: 160px; text-align: center; }
+/* 배우 테이블 ID 셀 강조 (인라인 스타일 이관 — admin.js renderActressTable) */
+.td-actress-id { color: #f59e0b; font-weight: bold; }
