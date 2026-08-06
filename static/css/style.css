@@ -813,13 +813,33 @@ body {
 
 /* === 2열 분리 배우 모달 & 분할 셀렉트 스타일 === */
 .custom-select-split {
-    min-width: 140px;
+    min-width: 135px;
+}
+#actress-modal .admin-modal-content {
+    max-width: 1100px;
+    height: 92vh;
+    padding: 8px 14px;
+}
+#actress-modal .modal-header {
+    height: 16px;
+    margin-bottom: 2px;
+    border-bottom: none;
+    padding: 0;
+}
+#actress-modal .modal-close-btn {
+    font-size: 20px;
+}
+#actress-modal .admin-form-group {
+    padding: 3px 8px;
+    margin-bottom: 6px;
 }
 .actress-modal-grid {
     display: flex;
-    gap: 15px;
-    height: 520px;
-    margin-top: 10px;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+    margin-top: 2px;
+    margin-bottom: 6px;
 }
 .actress-column {
     flex: 1;
@@ -831,8 +851,8 @@ body {
     overflow: hidden;
 }
 .actress-column-header {
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 4px 8px;
+    font-size: 12px;
     font-weight: bold;
     border-bottom: 1px solid #33333d;
 }
@@ -847,43 +867,46 @@ body {
 .actress-column-body {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 3px;
 }
 .actress-item-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 4px;
+    margin-bottom: 2px;
     background: #22222a;
-    padding: 4px 6px;
-    border-radius: 4px;
+    padding: 1px 3px;
+    border-radius: 3px;
 }
 .admin-input-order {
-    width: 48px;
+    width: 44px;
+    height: 22px;
     text-align: center;
     background: #121215;
     border: 1px solid #f59e0b;
     color: #f59e0b;
     font-weight: bold;
     border-radius: 3px;
-    padding: 2px 4px;
-    font-size: 12px;
+    padding: 1px 2px;
+    font-size: 11px;
 }
 .admin-input-title {
     flex: 1;
+    height: 22px;
     background: #1a1a20;
     border: 1px solid #3d3d4a;
     color: #fff;
     border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 12px;
+    padding: 1px 4px;
+    font-size: 11px;
 }
 .admin-input-eng {
     flex: 1;
+    height: 22px;
     background: #1a1a20;
     border: 1px solid #3d3d4a;
     color: #aaa;
     border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 12px;
+    padding: 1px 4px;
+    font-size: 11px;
 }
