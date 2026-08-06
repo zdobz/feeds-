@@ -884,6 +884,25 @@ body {
     padding: 1px 3px;
     border-radius: 3px;
 }
+.btn-switch-group {
+    background: #374151;
+    color: #9ca3af;
+    border: 1px solid #4b5563;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.btn-switch-group:hover {
+    background: #f59e0b;
+    color: #121212;
+}
+.btn-switch-active {
+    background: #7c2d12;
+    color: #fdba74;
+    border-color: #ea580c;
+}
 .admin-input-order {
     width: 44px;
     height: 22px;

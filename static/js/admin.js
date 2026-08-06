@@ -78,11 +78,26 @@ function renderActressTable() {
             item.sort_order = index + 1;
         }
         const sortStr = format3Digit(item.sort_order);
-        const isRetired = item.max_pub ? (item.max_pub < '2025-06-01') : true;
+        
+        let isRetired = false;
+        if (item.is_retired !== undefined && item.is_retired !== null) {
+            isRetired = (item.is_retired === 1);
+        } else if (item.max_pub) {
+            isRetired = (item.max_pub < '2025-06-01');
+        } else {
+            isRetired = true;
+        }
+        item.is_retired = isRetired ? 1 : 0;
 
         const row = document.createElement('div');
         row.className = 'actress-item-row';
+        
+        const switchBtn = !isRetired
+            ? `<button type="button" class="btn-base btn-switch-group" onclick="toggleActressStatus(${item.id}, 1)" title="은퇴/휴면 배우 그룹으로 이동">구</button>`
+            : `<button type="button" class="btn-base btn-switch-group btn-switch-active" onclick="toggleActressStatus(${item.id}, 0)" title="신규/활발 배우 그룹으로 이동">신</button>`;
+
         row.innerHTML = `
+            ${switchBtn}
             <input type="text" class="admin-input-order" value="${sortStr}" onchange="updateActressOrder(${item.id}, this)">
             <input type="text" class="admin-input-title" value="${escHtml(item.title)}" onchange="updateActressField(${item.id}, 'title', this.value)">
             <input type="text" class="admin-input-eng" value="${escHtml(item.english_name || '')}" onchange="updateActressField(${item.id}, 'english_name', this.value)" placeholder="영문명">
@@ -95,6 +110,14 @@ function renderActressTable() {
             retiredContainer.appendChild(row);
         }
     });
+}
+
+function toggleActressStatus(id, newRetiredState) {
+    const idx = tempActressList.findIndex(item => item.id === id);
+    if (idx !== -1) {
+        tempActressList[idx].is_retired = newRetiredState;
+        renderActressTable();
+    }
 }
 
 function updateActressOrder(id, inputEl) {
