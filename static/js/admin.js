@@ -87,7 +87,7 @@ function renderActressTable() {
         } else {
             isRetired = true;
         }
-        item.is_retired = isRetired ? 1 : 0;
+        if (!item.new_id) item.new_id = item.id;
 
         const row = document.createElement('div');
         row.className = 'actress-item-row';
@@ -98,7 +98,8 @@ function renderActressTable() {
 
         row.innerHTML = `
             ${switchBtn}
-            <input type="text" class="admin-input-order" value="${sortStr}" onchange="updateActressOrder(${item.id}, this)">
+            <input type="text" class="admin-input-order" value="${sortStr}" onchange="updateActressOrder(${item.id}, this)" title="순서 번호">
+            <input type="text" class="admin-input-id" value="${item.new_id}" onchange="updateActressField(${item.id}, 'new_id', this.value)" title="고유 ID">
             <input type="text" class="admin-input-title" value="${escHtml(item.title)}" onchange="updateActressField(${item.id}, 'title', this.value)">
             <input type="text" class="admin-input-eng" value="${escHtml(item.english_name || '')}" onchange="updateActressField(${item.id}, 'english_name', this.value)" placeholder="영문명">
             <button type="button" class="btn-base btn-row-del" onclick="deleteActressRow(${item.id})">✕</button>

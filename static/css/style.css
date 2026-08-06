@@ -915,6 +915,18 @@ body {
     padding: 1px 2px;
     font-size: 11px;
 }
+.admin-input-id {
+    width: 36px;
+    height: 22px;
+    text-align: center;
+    background: #121215;
+    border: 1px solid #3b82f6;
+    color: #60a5fa;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 1px 2px;
+    font-size: 11px;
+}
 .admin-input-title {
     flex: 1;
     height: 22px;
