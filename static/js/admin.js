@@ -42,7 +42,12 @@ function closeActressModal() {
     tempActressList = [];
 }
 
-/** /api/actress/list 호출 후 tempActressList에 저장하고 테이블을 렌더링합니다. */
+function format3Digit(val) {
+    const num = parseInt(val) || 0;
+    return String(num).padStart(3, '0');
+}
+
+/** /api/actress/list 호출 후 tempActressList에 저장하고 2열 테이블을 렌더링합니다. */
 function fetchActressList() {
     fetch('/api/actress/list')
         .then(res => res.json())
@@ -57,47 +62,51 @@ function fetchActressList() {
 }
 
 /**
- * tempActressList의 현재 상태를 테이블 DOM으로 렌더링합니다.
- * 매 조작(row move/delete/add) 후 호출되어 테이블을 원자적으로 재구성합니다.
+ * tempActressList의 현재 상태를 좌/우 2열 DOM으로 렌더링합니다.
+ * 순서 번호는 000 3자리 포맷으로 관리됩니다.
  */
 function renderActressTable() {
-    const tbody = document.getElementById('actress-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    tempActressList.forEach((item) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="td-actress-id">${item.id}</td>
-            <td>
-                <input type="text" class="admin-input admin-input-cell" value="${escHtml(item.title)}" onchange="updateActressField(${item.id}, 'title', this.value)">
-            </td>
-            <td>
-                <input type="text" class="admin-input admin-input-cell" value="${escHtml(item.english_name || '')}" onchange="updateActressField(${item.id}, 'english_name', this.value)">
-            </td>
-            <td class="admin-action-cell">
-                <button type="button" class="btn-base btn-row-move" onclick="moveActressRow(${item.id}, -1)" title="위로 이동">▲</button>
-                <button type="button" class="btn-base btn-row-move" onclick="moveActressRow(${item.id}, 1)" title="아래로 이동">▼</button>
-                <button type="button" class="btn-base btn-row-del" onclick="deleteActressRow(${item.id})">삭제</button>
-            </td>
+    const activeContainer = document.getElementById('actress-active-list');
+    const retiredContainer = document.getElementById('actress-retired-list');
+    if (!activeContainer || !retiredContainer) return;
+
+    activeContainer.innerHTML = '';
+    retiredContainer.innerHTML = '';
+
+    tempActressList.forEach((item, index) => {
+        if (!item.sort_order && item.sort_order !== 0) {
+            item.sort_order = index + 1;
+        }
+        const sortStr = format3Digit(item.sort_order);
+        const isRetired = item.max_pub ? (item.max_pub < '2025-06-01') : true;
+
+        const row = document.createElement('div');
+        row.className = 'actress-item-row';
+        row.innerHTML = `
+            <input type="text" class="admin-input-order" value="${sortStr}" onchange="updateActressOrder(${item.id}, this)">
+            <input type="text" class="admin-input-title" value="${escHtml(item.title)}" onchange="updateActressField(${item.id}, 'title', this.value)">
+            <input type="text" class="admin-input-eng" value="${escHtml(item.english_name || '')}" onchange="updateActressField(${item.id}, 'english_name', this.value)" placeholder="영문명">
+            <button type="button" class="btn-base btn-row-del" onclick="deleteActressRow(${item.id})">✕</button>
         `;
-        tbody.appendChild(tr);
+
+        if (!isRetired) {
+            activeContainer.appendChild(row);
+        } else {
+            retiredContainer.appendChild(row);
+        }
     });
 }
 
-/** 해당 id 항목을 direction(-1 위, +1 아래) 방향으로 tempActressList에서 순서 이동합니다. */
-function moveActressRow(id, direction) {
-    const index = tempActressList.findIndex(item => item.id === id);
-    if (index === -1) return;
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= tempActressList.length) return;
-    const temp = tempActressList[index];
-    tempActressList[index] = tempActressList[newIndex];
-    tempActressList[newIndex] = temp;
-    renderActressTable();
+function updateActressOrder(id, inputEl) {
+    const val = parseInt(inputEl.value) || 0;
+    inputEl.value = format3Digit(val);
+    const idx = tempActressList.findIndex(item => item.id === id);
+    if (idx !== -1) {
+        tempActressList[idx].sort_order = val;
+    }
 }
 
-/** tempActressList의 지정된 id 항목의 필드(title 또는 english_name)를 실시간 수정합니다. */
+/** tempActressList의 지정된 id 항목의 필드를 실시간 수정합니다. */
 function updateActressField(id, field, value) {
     const idx = tempActressList.findIndex(item => item.id === id);
     if (idx !== -1) {
@@ -146,6 +155,7 @@ function deleteActressRow(id) {
 
 /** 현재 tempActressList를 POST /api/actress/save로 서버에 저장합니다. (DB sort_order 갱신) */
 function saveActressChanges() {
+    tempActressList.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     fetch('/api/actress/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

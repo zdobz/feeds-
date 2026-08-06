@@ -49,11 +49,23 @@
         <!-- [기능 추가] 프로필(나이대/키) 서랍 개폐 전용 버튼 -->
         <button type="button" onclick="toggleProfileDrawer()" class="btn-base btn-tool-orange">프로필</button>
 
-        <div class="custom-select" id="custom-select-box">
-            <div class="select-trigger" id="select-trigger-btn">{{ selected_actress_name }}</div>
-            <div class="select-options" id="select-options-list">
-                <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 전체 배우 --</div>
-                {% for act in actresses %}
+        <!-- 1) 신규/활발 배우 선택 폼 -->
+        <div class="custom-select custom-select-split" id="custom-select-box-active">
+            <div class="select-trigger" id="select-trigger-btn-active">🔥 활발 배우</div>
+            <div class="select-options" id="select-options-list-active">
+                <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 활발 배우 --</div>
+                {% for act in active_actresses %}
+                <div class="option-item {% if act.id|string == feed_id %}selected{% endif %}" data-value="{{ act.id }}">{{ act.display_name }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 2) 은퇴/휴면 배우 선택 폼 -->
+        <div class="custom-select custom-select-split" id="custom-select-box-retired">
+            <div class="select-trigger" id="select-trigger-btn-retired">☕ 은퇴/휴면</div>
+            <div class="select-options" id="select-options-list-retired">
+                <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 은퇴/휴면 --</div>
+                {% for act in retired_actresses %}
                 <div class="option-item {% if act.id|string == feed_id %}selected{% endif %}" data-value="{{ act.id }}">{{ act.display_name }}</div>
                 {% endfor %}
             </div>
@@ -216,21 +228,16 @@
             <button type="button" class="btn-base btn-modal-action-add" onclick="addActressRow()">추가</button>
         </div>
         
-        <!-- 배우 목록 테이블 (최대 750px 높이, 스크롤 가능) -->
-        <div class="admin-table-container">
-            <table id="actress-table" class="admin-table">
-                <thead>
-                    <tr>
-                        <th class="th-id">ID</th>
-                        <th>한글 이름 (수정 가능)</th>
-                        <th>영문 이름 (수정 가능)</th>
-                        <th class="th-action">동작</th>
-                    </tr>
-                </thead>
-                <tbody id="actress-table-body">
-                    <!-- 자바스크립트(admin.js)로 동적 렌더링 -->
-                </tbody>
-            </table>
+        <!-- 배우 목록 좌/우 2열 분리 레이아웃 (3자리 순서 번호 입력) -->
+        <div class="actress-modal-grid">
+            <div class="actress-column">
+                <div class="actress-column-header active-header">🔥 신규/활발 배우 (2025.06~)</div>
+                <div id="actress-active-list" class="actress-column-body"></div>
+            </div>
+            <div class="actress-column">
+                <div class="actress-column-header retired-header">☕ 은퇴/휴면 배우 (~2025.05)</div>
+                <div id="actress-retired-list" class="actress-column-body"></div>
+            </div>
         </div>
         
         <!-- 모달 풋터 (청소/적용/닫기) -->
