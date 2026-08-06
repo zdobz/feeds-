@@ -51,7 +51,7 @@
 
         <!-- 1) 신규/활발 배우 선택 폼 -->
         <div class="custom-select custom-select-split" id="custom-select-box-active">
-            <div class="select-trigger" id="select-trigger-btn-active">{% if feed_id and selected_actress_is_active %}{{ selected_actress_name }}{% else %}활발 배우{% endif %}</div>
+            <div class="select-trigger" id="select-trigger-btn-active">{% if feed_id and selected_actress_is_active %}{{ feed_id }}{% else %}활발 배우{% endif %}</div>
             <div class="select-options" id="select-options-list-active">
                 <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 활발 배우 --</div>
                 {% for act in active_actresses %}
@@ -62,7 +62,7 @@
 
         <!-- 2) 은퇴/휴면 배우 선택 폼 -->
         <div class="custom-select custom-select-split" id="custom-select-box-retired">
-            <div class="select-trigger" id="select-trigger-btn-retired">{% if feed_id and not selected_actress_is_active %}{{ selected_actress_name }}{% else %}은퇴/휴면{% endif %}</div>
+            <div class="select-trigger" id="select-trigger-btn-retired">{% if feed_id and not selected_actress_is_active %}{{ feed_id }}{% else %}은퇴/휴면{% endif %}</div>
             <div class="select-options" id="select-options-list-retired">
                 <div class="option-item {% if not feed_id %}selected{% endif %}" data-value="">-- 은퇴/휴면 --</div>
                 {% for act in retired_actresses %}
