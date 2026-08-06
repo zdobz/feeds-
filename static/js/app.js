@@ -436,16 +436,9 @@
         }
     };
 
-    // --- [6] 드롭다운 셀렉트박스 (배우/연도) ---
-    const selectBox = document.getElementById('custom-select-box');
-    const triggerBtn = document.getElementById('select-trigger-btn');
-    const optionsList = document.getElementById('select-options-list');
-    const feedIdInput = document.getElementById('feed-id-input');
+    // --- [6] 드롭다운 셀렉트박스 (활발배우 / 은퇴배우 / 연도) ---
     const filterForm = document.getElementById('filter-form');
-
-    const yearSelectBox = document.getElementById('year-select-box');
-    const yearTriggerBtn = document.getElementById('year-trigger-btn');
-    const yearOptionsList = document.getElementById('year-options-list');
+    const feedIdInput = document.getElementById('feed-id-input');
     const yearInput = document.getElementById('year-input');
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -454,48 +447,43 @@
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = urlParams.get('q') || '';
 
-    if (triggerBtn && optionsList) {
-        triggerBtn.addEventListener('click', function(e) {
+    // 모든 custom-select 드롭다운 토글 및 항목 선택 이벤트 등록
+    document.querySelectorAll('.custom-select').forEach(box => {
+        const trigger = box.querySelector('.select-trigger');
+        const options = box.querySelector('.select-options');
+        if (!trigger || !options) return;
+
+        trigger.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (yearOptionsList) yearOptionsList.classList.remove('open');
-            optionsList.classList.toggle('open');
+            // 다른 드롭다운 닫기
+            document.querySelectorAll('.select-options').forEach(opt => {
+                if (opt !== options) opt.classList.remove('open');
+            });
+            options.classList.toggle('open');
         });
 
-        document.querySelectorAll('.option-item').forEach(item => {
+        options.querySelectorAll('.option-item, .year-option-item').forEach(item => {
             item.addEventListener('click', function() {
                 const val = this.getAttribute('data-value');
-                feedIdInput.value = val;
-                optionsList.classList.remove('open');
+                if (item.classList.contains('year-option-item')) {
+                    if (yearInput) yearInput.value = val;
+                } else {
+                    if (feedIdInput) feedIdInput.value = val;
+                }
+                options.classList.remove('open');
                 if (filterForm) filterForm.submit();
             });
         });
+    });
 
-        document.addEventListener('click', function(e) {
-            if (!selectBox.contains(e.target)) {
-                optionsList.classList.remove('open');
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.custom-select').forEach(box => {
+            if (!box.contains(e.target)) {
+                const opt = box.querySelector('.select-options');
+                if (opt) opt.classList.remove('open');
             }
-            if (yearSelectBox && !yearSelectBox.contains(e.target)) {
-                yearOptionsList.classList.remove('open');
-            }
         });
-    }
-
-    if (yearTriggerBtn && yearOptionsList) {
-        yearTriggerBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            optionsList.classList.remove('open');
-            yearOptionsList.classList.toggle('open');
-        });
-
-        document.querySelectorAll('.year-option-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const val = this.getAttribute('data-value');
-                yearInput.value = val;
-                yearOptionsList.classList.remove('open');
-                if (filterForm) filterForm.submit();
-            });
-        });
-    }
+    });
 
     window.removeFilter = function(type) {
         if (type === 'feed_id') {
