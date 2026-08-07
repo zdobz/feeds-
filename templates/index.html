@@ -175,8 +175,15 @@
                     {% else %}
                     <span class="card-code-text">{{ card.first_word }}</span>
                     {% endif %}
-                    <!-- 배우명 링크: 클릭 시 해당 배우 필터링 -->
-                    <a href="/?feed_id={{ card.feed_id }}" class="card-actress-link">{{ card.actress_name }}</a>
+                    <!-- 배우명 링크: 클릭 시 해당 배우 필터링 (영명) 및 나무위키 이동 (일명) -->
+                    {% if card.actress_eng_name %}
+                    <a href="/?feed_id={{ card.feed_id }}" class="card-actress-link">{{ card.actress_eng_name }}</a>
+                    {% endif %}
+                    {% if card.namu_link %}
+                    <a href="{{ card.namu_link }}" target="_blank" class="card-actress-link card-actress-namu-link">{{ card.actress_ja_name }}</a>
+                    {% else %}
+                    <a href="/?feed_id={{ card.feed_id }}" class="card-actress-link">{{ card.actress_ja_name }}</a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
