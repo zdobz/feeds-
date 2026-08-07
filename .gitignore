@@ -1,14 +1,28 @@
-# 1. 모든 파일과 폴더를 기본적으로 무시합니다.
-*
+# Python 캐시 파일 및 컴파일 파일 무시
+__pycache__/
+*.py[cod]
+*$py.class
 
-# 2. static 폴더와 그 안의 모든 내용을 포함합니다.
-!static/
-!static/**
+# 로컬 SQLite 데이터베이스 및 트랜잭션 파일 무시 (동기화 충돌 방지)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 
-# 3. templates 폴더와 그 안의 모든 내용을 포함합니다.
-!templates/
-!templates/**
+# IDE 및 개발 도구 환경 설정 무시
+.vscode/
+.idea/
+.gemini/
+.agents/
+venv/
+.venv/
+env/
 
-# 4. (선택) 이 외의 특정 파일이나 폴더가 더 있다면 여기에 추가하세요.
-# 예: !videos.db
-*.zip'!/.gitignore' 
+# OS 시스템 아티팩트 무시
+.DS_Store
+Thumbs.db
+
+# 임시 작업 폴더 및 로그 파일 무시
+scratch/
+*.tmp
+*.log
